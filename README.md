@@ -50,7 +50,7 @@ Fails if the target file already exists; pass `--force, -f` to overwrite it.
 ### Run
 
 ```sh
-juno [--verbose, -v] [--dry-run] [--config, -c FILE_PATH] [--rule, -r FILE_PATH]
+juno [--verbose, -v] [--dry-run] [--config, -c FILE_PATH] [--rule, -r FILE_PATH] [--log, -l FILE_PATH]
 ```
 
 | Option | Description |
@@ -59,6 +59,7 @@ juno [--verbose, -v] [--dry-run] [--config, -c FILE_PATH] [--rule, -r FILE_PATH]
 | `--rule, -r` | Only process rule files whose path contains this substring |
 | `--verbose, -v` | Print the config file, rule files, and log files as they are processed |
 | `--dry-run` | Don't run the notify command; print notification content to stdout instead (and don't update `latest`) |
+| `--log, -l` | Append runtime errors (JSONL, `{"timestamp","message"}`) to this file instead of stderr |
 
 ## Config file (juno.yaml)
 

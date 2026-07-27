@@ -18,6 +18,7 @@ type globalCmd struct {
 	Rule    string `cli:"rule,r" help:"only process rule files whose path contains this substring"`
 	Verbose bool   `cli:"verbose,v" help:"print the config file, rule files, and log files as they are processed"`
 	DryRun  bool   `cli:"dry-run" help:"ignore Command and print notification content to stdout instead; don't update Latest"`
+	Log     string `cli:"log,l" help:"append runtime errors (JSONL) to this file instead of stderr"`
 
 	Generate generateCmd `cli:"generate" help:"generate a config or rule file template"`
 }
@@ -37,6 +38,7 @@ func (g *globalCmd) Before() error {
 			fmt.Fprintf(os.Stdout, format, args...)
 		}
 	}
+	errorLogFile = g.Log
 	return nil
 }
 
@@ -66,7 +68,7 @@ func (g *globalCmd) Run() error {
 	for _, rule := range rules {
 		verbose("rule: %s\n", rule.FilePath)
 		if err := ProcessRule(rule, cfg.Command, g.DryRun); err != nil {
-			fmt.Fprintf(os.Stderr, "juno: rule %s: %v\n", rule.Name, err)
+			logError("rule %s: %v", rule.Name, err)
 		}
 	}
 
@@ -81,7 +83,7 @@ func main() {
 	app.SuppressErrorOutput = true
 
 	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		logError("%v", err)
 		os.Exit(1)
 	}
 }

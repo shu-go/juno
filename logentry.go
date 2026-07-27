@@ -3,9 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"io"
-	"os"
 )
 
 // LogEntry is a single JSONL log entry.
@@ -18,8 +16,8 @@ func (e LogEntry) Timestamp() string {
 
 // ReadLogEntries reads JSONL from r, calling fn for each successfully parsed entry
 // in file order. Lines that fail to parse as a JSON object are skipped, and the
-// parse error is reported to stderr.
-func ReadLogEntries(r io.Reader, fn func(LogEntry) error) error {
+// parse error is reported via logError, tagged with logFile and the line number.
+func ReadLogEntries(logFile string, r io.Reader, fn func(LogEntry) error) error {
 	scanner := bufio.NewScanner(r)
 	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 	lineNo := 0
@@ -32,7 +30,7 @@ func ReadLogEntries(r io.Reader, fn func(LogEntry) error) error {
 
 		var entry LogEntry
 		if err := json.Unmarshal(line, &entry); err != nil {
-			fmt.Fprintf(os.Stderr, "juno: line %d: %v\n", lineNo, err)
+			logError("log %s: line %d: %v", logFile, lineNo, err)
 			continue
 		}
 

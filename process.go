@@ -34,18 +34,18 @@ func ProcessRule(rule *Rule, configCommand string, dryRun bool) error {
 
 		f, err := os.Open(logFile)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "juno: rule %s: log %s: %v\n", rule.Name, logFile, err)
+			logError("rule %s: log %s: %v", rule.Name, logFile, err)
 			continue
 		}
 
 		r, err := decodingReader(rule.Encoding, f)
 		if err != nil {
 			f.Close()
-			fmt.Fprintf(os.Stderr, "juno: rule %s: log %s: %v\n", rule.Name, logFile, err)
+			logError("rule %s: log %s: %v", rule.Name, logFile, err)
 			continue
 		}
 
-		err = ReadLogEntries(r, func(entry LogEntry) error {
+		err = ReadLogEntries(logFile, r, func(entry LogEntry) error {
 			rule.NoteTimestamp(entry.Timestamp())
 
 			if !rule.IsNew(entry.Timestamp()) {
@@ -122,7 +122,7 @@ func deliver(rule *Rule, notifyCmd, logFile, content string, dryRun bool) {
 		return
 	}
 	if err := Notify(notifyCmd, content); err != nil {
-		fmt.Fprintf(os.Stderr, "juno: rule %s: %v\n", rule.Name, err)
+		logError("rule %s: %v", rule.Name, err)
 	}
 }
 

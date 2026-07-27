@@ -99,7 +99,7 @@ func LoadRules(rulesDir string) ([]*Rule, error) {
 	for _, f := range files {
 		rule, err := loadRuleFile(rulesDir, f)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "juno: rule %s: %v\n", f, err)
+			logError("rule %s: %v", f, err)
 			continue
 		}
 		rules = append(rules, rule)
