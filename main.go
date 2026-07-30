@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	gli "github.com/shu-go/gli/v2"
 )
@@ -67,7 +68,7 @@ func (g *globalCmd) Run() error {
 
 	for _, rule := range rules {
 		verbose("rule: %s\n", rule.FilePath)
-		if err := ProcessRule(rule, cfg.Command, g.DryRun); err != nil {
+		if err := ProcessRule(rule, cfg.Command, time.Duration(cfg.Interval), g.DryRun); err != nil {
 			logError("rule %s: %v", rule.Name, err)
 		}
 	}

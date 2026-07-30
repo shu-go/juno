@@ -22,6 +22,9 @@ rules: ./rules/
 # is sent to its standard input. Paths may be written with "/"; they are
 # converted to the OS path separator at runtime.
 command: "your-notify-command"
+
+# interval: wait time after each notify command execution. Optional, default: 1s.
+#interval: 1s
 `
 
 const ruleTemplate = `# juno rule file

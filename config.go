@@ -4,14 +4,37 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
 
+// defaultInterval is the wait time after running the notify command when
+// Interval is not set in the config file.
+const defaultInterval = 1 * time.Second
+
+// Duration unmarshals a YAML duration string (e.g. "1s", "500ms") into a
+// time.Duration.
+type Duration time.Duration
+
+func (d *Duration) UnmarshalYAML(node *yaml.Node) error {
+	var s string
+	if err := node.Decode(&s); err != nil {
+		return err
+	}
+	parsed, err := time.ParseDuration(s)
+	if err != nil {
+		return fmt.Errorf("interval: %w", err)
+	}
+	*d = Duration(parsed)
+	return nil
+}
+
 // Config is the content of juno.yaml.
 type Config struct {
-	Rules   string `yaml:"rules"`
-	Command string `yaml:"command"`
+	Rules    string   `yaml:"rules"`
+	Command  string   `yaml:"command"`
+	Interval Duration `yaml:"interval"`
 
 	// RulesDir is Rules resolved to an absolute path (relative to the config
 	// file's directory when Rules is a relative path).
@@ -37,6 +60,10 @@ func LoadConfig(path string) (*Config, error) {
 
 	if cfg.Rules == "" {
 		cfg.Rules = "./rules/"
+	}
+
+	if cfg.Interval == 0 {
+		cfg.Interval = Duration(defaultInterval)
 	}
 
 	configDir := filepath.Dir(path)
