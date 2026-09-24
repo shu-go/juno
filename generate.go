@@ -18,9 +18,11 @@ const configTemplate = `# juno config file
 # rules: folder containing rule files (searched recursively). Optional, default: ./rules/
 rules: ./rules/
 
-# command: command line invoked for each notification; the formatted content
-# is sent to its standard input. Paths may be written with "/"; they are
-# converted to the OS path separator at runtime.
+# command: command line(s) invoked for each notification; the formatted
+# content is sent to each one's standard input. A single string or a list of
+# strings; when a list, the same content is sent to every command. Paths may
+# be written with "/"; they are converted to the OS path separator at
+# runtime.
 command: "your-notify-command"
 
 # interval: wait time after each notify command execution. Optional, default: 1s.
@@ -59,7 +61,8 @@ filter: "log.Level == \"error\""
 # default "[name] {json}" format.
 #notify: "log.Message"
 
-# command: optional override of the config file's command for this rule.
+# command: optional override of the config file's command for this rule. A
+# single string or a list of strings, like logs above.
 #command: "your-notify-command"
 
 # latest: managed by juno. Do not edit manually.

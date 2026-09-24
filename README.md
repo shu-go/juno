@@ -67,7 +67,9 @@ juno [--verbose, -v] [--dry-run] [--config, -c FILE_PATH] [--rule, -r FILE_PATH]
 # rules: folder containing rule files (default: ./rules/)
 rules: ./rules/
 
-# command: command line invoked for each notification (content is sent via stdin)
+# command: command line(s) invoked for each notification (content is sent via
+# stdin to each one). A string or a list of strings; when a list, the same
+# content is sent to every command.
 command: "your-notify-command"
 ```
 
@@ -92,6 +94,7 @@ filter: "log.Level == \"error\""
 # notify: Expr expression formatting the notification content (default format if omitted)
 #notify: "log.Message"
 
-# command: overrides the config file's command for this rule
+# command: overrides the config file's command for this rule (a string or a
+# list of strings, like logs above)
 #command: "your-notify-command"
 ```

@@ -54,7 +54,7 @@ type RuleFile struct {
 	Filter   string     `yaml:"filter"`
 	Key      string     `yaml:"key"`
 	Notify   string     `yaml:"notify"`
-	Command  string     `yaml:"command"`
+	Command  StringList `yaml:"command"`
 }
 
 // Rule is a loaded, validated rule ready for processing.
@@ -165,17 +165,17 @@ func loadRuleFile(rulesDir, path string) (*Rule, error) {
 		rule.NotifyProgram = notifyProgram
 	}
 
-	if rule.Command != "" {
-		rule.Command = filepath.FromSlash(rule.Command)
+	for i, c := range rule.Command {
+		rule.Command[i] = filepath.FromSlash(c)
 	}
 
 	return rule, nil
 }
 
-// CommandLine returns the rule's Command override if set, otherwise
+// CommandLines returns the rule's Command override if set, otherwise
 // configCommand.
-func (r *Rule) CommandLine(configCommand string) string {
-	if r.Command != "" {
+func (r *Rule) CommandLines(configCommand []string) []string {
+	if len(r.Command) > 0 {
 		return r.Command
 	}
 	return configCommand

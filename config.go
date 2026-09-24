@@ -32,9 +32,9 @@ func (d *Duration) UnmarshalYAML(node *yaml.Node) error {
 
 // Config is the content of juno.yaml.
 type Config struct {
-	Rules    string   `yaml:"rules"`
-	Command  string   `yaml:"command"`
-	Interval Duration `yaml:"interval"`
+	Rules    string     `yaml:"rules"`
+	Command  StringList `yaml:"command"`
+	Interval Duration   `yaml:"interval"`
 
 	// RulesDir is Rules resolved to an absolute path (relative to the config
 	// file's directory when Rules is a relative path).
@@ -53,10 +53,12 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("parse config: %w", err)
 	}
 
-	if cfg.Command == "" {
+	if len(cfg.Command) == 0 {
 		return nil, fmt.Errorf("config: command is required")
 	}
-	cfg.Command = filepath.FromSlash(cfg.Command)
+	for i, c := range cfg.Command {
+		cfg.Command[i] = filepath.FromSlash(c)
+	}
 
 	if cfg.Rules == "" {
 		cfg.Rules = "./rules/"

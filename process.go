@@ -18,8 +18,8 @@ import (
 // Command is ignored and notification content is printed to stdout (along
 // with the rule and log file involved) instead, and Latest is not updated.
 // interval is the wait time after each notify command execution.
-func ProcessRule(rule *Rule, configCommand string, interval time.Duration, dryRun bool) error {
-	notifyCmd := rule.CommandLine(configCommand)
+func ProcessRule(rule *Rule, configCommand []string, interval time.Duration, dryRun bool) error {
+	notifyCmds := rule.CommandLines(configCommand)
 
 	logFiles, err := matchLogFiles(rule)
 	if err != nil {
@@ -71,7 +71,7 @@ func ProcessRule(rule *Rule, configCommand string, interval time.Duration, dryRu
 				if err != nil {
 					return fmt.Errorf("notify: %w", err)
 				}
-				deliver(rule, notifyCmd, logFile, content, interval, dryRun)
+				deliver(rule, notifyCmds, logFile, content, interval, dryRun)
 				return nil
 			}
 
@@ -101,7 +101,7 @@ func ProcessRule(rule *Rule, configCommand string, interval time.Duration, dryRu
 		if err != nil {
 			return fmt.Errorf("notify: %w", err)
 		}
-		deliver(rule, notifyCmd, pendingLogFile[key], content, interval, dryRun)
+		deliver(rule, notifyCmds, pendingLogFile[key], content, interval, dryRun)
 	}
 
 	if dryRun {
@@ -115,18 +115,21 @@ func ProcessRule(rule *Rule, configCommand string, interval time.Duration, dryRu
 	return nil
 }
 
-// deliver sends content to notifyCmd, or, when dryRun is true, prints it to
-// stdout along with the rule and log file it came from instead of running
-// notifyCmd. After running notifyCmd, it waits for interval before returning.
-func deliver(rule *Rule, notifyCmd, logFile, content string, interval time.Duration, dryRun bool) {
+// deliver sends content to each of notifyCmds, or, when dryRun is true,
+// prints it to stdout along with the rule and log file it came from instead
+// of running notifyCmds. After running each notify command, it waits for
+// interval before continuing.
+func deliver(rule *Rule, notifyCmds []string, logFile, content string, interval time.Duration, dryRun bool) {
 	if dryRun {
 		fmt.Printf("[dry-run] rule=%s log=%s\n%s\n\n", rule.FilePath, logFile, content)
 		return
 	}
-	if err := Notify(notifyCmd, content); err != nil {
-		logError("rule %s: %v", rule.Name, err)
+	for _, notifyCmd := range notifyCmds {
+		if err := Notify(notifyCmd, content); err != nil {
+			logError("rule %s: %v", rule.Name, err)
+		}
+		time.Sleep(interval)
 	}
-	time.Sleep(interval)
 }
 
 // matchLogFiles resolves the rule's Logs glob patterns (relative to the
